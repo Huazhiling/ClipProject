@@ -1,5 +1,8 @@
 package com.dasu.clipproject.listener
 
 interface IWindowOnClickListener {
-    fun openView()
+    fun openClipManagerView()
+    fun openClipWindow()
+    fun getDesrc(msg:String)
+
 }

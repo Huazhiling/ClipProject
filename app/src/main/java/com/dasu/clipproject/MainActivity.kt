@@ -1,5 +1,6 @@
 package com.dasu.clipproject
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -17,13 +18,15 @@ import com.dasu.clipproject.common.Constans.IS_WINDOW
 import com.dasu.clipproject.listener.IWindowOnClickListener
 import com.dasu.clipproject.service.SuspensionWindowService
 import com.gyf.barlibrary.ImmersionBar
+import com.per.rslibrary.IPermissionRequest
 import com.per.rslibrary.RsPermission
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     private var isWindow = SPUtils.getInstance().getBoolean(IS_WINDOW)
-    private var windowService: SuspensionWindowService? = null
+    private var windowService: SuspensionWindowService.WindowBinder? = null
     private val OVERLAY_PERMISSION_REQ_CODE = 200
+
 
     private fun initView() {
         ImmersionBar.with(this).statusBarView(R.id.status_bar).statusBarDarkFont(true).init()
@@ -96,21 +99,52 @@ class MainActivity : AppCompatActivity() {
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             if (service is SuspensionWindowService.WindowBinder) {
-                windowService = service.getService
-                LogUtils.e("WindowToast",windowService)
-                windowService!!.setWindowOnClickListener(object : IWindowOnClickListener {
-                    override fun openView() {
-                        LogUtils.e("WindowToast",this)
-                        LogUtils.e("WindowToast","Window窗口点击")
+                windowService = service
+                LogUtils.e("WindowToast", windowService)
+                windowService!!.getService.setWindowOnClickListener(object : IWindowOnClickListener {
+                    override fun openClipWindow() {
+                        windowService!!.updateClipWindowView()
+                    }
+
+                    override fun getDesrc(msg: String) {
+
+//                        RsPermission.getInstance()
+//                                .setRequestCode(200)
+//                                .setiPermissionRequest(object : IPermissionRequest {
+//                                    override fun toSetting() {
+//
+//                                    }
+//
+//                                    override fun cancle(p0: Int) {
+//
+//                                    }
+//
+//                                    override fun success(p0: Int) {
+//
+//                                    }
+//
+//                                }).requestPermission(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    }
+
+                    override fun openClipManagerView() {
+                        windowService!!.updateClipManagerView()
                     }
                 })
             }
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        if (windowService != null) {
+            if (windowService!!.getService.getIsClipManager()) {
+                windowService!!.updateClipWindowView()
+            }
+        }
+    }
+
     override fun onDestroy() {
         SPUtils.getInstance().put(IS_WINDOW, false)
-        LogUtils.e("WindowToast",SPUtils.getInstance().getBoolean(IS_WINDOW))
         control_window.isChecked = true
         if (windowService != null) {
             unbindService(windowConnection)
