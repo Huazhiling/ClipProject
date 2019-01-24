@@ -8,5 +8,7 @@ import com.dasu.clipproject.bean.ClipBean
 class ClipAdapter(layoutResId: Int, data: ArrayList<ClipBean.ClipItemData>?) : BaseQuickAdapter<ClipBean.ClipItemData, BaseViewHolder>(layoutResId, data) {
     override fun convert(helper: BaseViewHolder?, item: ClipBean.ClipItemData?) {
         helper?.setText(R.id.clip_content, item!!.content)
+        helper?.addOnClickListener(R.id.item_layout)
+        helper?.addOnClickListener(R.id.clip_content)
     }
 }

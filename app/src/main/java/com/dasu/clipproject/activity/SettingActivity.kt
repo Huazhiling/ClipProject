@@ -4,20 +4,17 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.dasu.clipproject.R
 import com.gyf.barlibrary.ImmersionBar
+import kotlinx.android.synthetic.main.activity_setting.*
 
-class ClipboardRecordActivity : AppCompatActivity() {
+class SettingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_clip_list)
+        setContentView(R.layout.activity_setting)
+        toolbar.setNavigationOnClickListener { finish() }
         initView()
-        initData()
-    }
-
-    private fun initData() {
-
     }
 
     private fun initView() {
-        ImmersionBar.with(this).titleBar(R.id.status_bar).statusBarDarkFont(true).init()
+        ImmersionBar.with(this).statusBarView(R.id.status_bar).statusBarDarkFont(true).init()
     }
 }

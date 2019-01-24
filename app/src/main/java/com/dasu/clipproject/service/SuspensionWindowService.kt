@@ -1,6 +1,7 @@
 package com.dasu.clipproject.service
 
 import android.app.Service
+import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -12,6 +13,7 @@ import android.view.*
 import com.blankj.utilcode.util.ConvertUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.SPUtils
+import com.blankj.utilcode.util.ToastUtils
 import com.dasu.clipproject.R
 import com.dasu.clipproject.adapter.ClipAdapter
 import com.dasu.clipproject.bean.ClipBean
@@ -22,6 +24,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.gyf.barlibrary.ImmersionBar
 import kotlinx.android.synthetic.main.layout_clip_list.view.*
 import kotlinx.android.synthetic.main.layout_window.view.*
 
@@ -41,13 +44,13 @@ class SuspensionWindowService : Service() {
     private lateinit var clipWindowManagerLayoutParams: WindowManager.LayoutParams
     private var isClipManager = false
     private var fristClip = ""
+    private var isAppClip = false
     override fun onCreate() {
         super.onCreate()
         createOnWindowManager()
         createClipListener()
         createClipCollection()
     }
-
 
 
     private fun createClipCollection() {
@@ -68,6 +71,7 @@ class SuspensionWindowService : Service() {
                 element.addProperty("isWhetherToCollect", false)
                 clipArray.add(element)
                 data.add(clipItemData)
+                fristClip = clipItemData.content
             }
             clipJson.add("clipList", clipArray)
         }
@@ -82,7 +86,7 @@ class SuspensionWindowService : Service() {
             var primary = clipManager.primaryClip.getItemAt(0).text
             if (primary != null && primary != "") {
                 var clipBean = ClipBean.ClipItemData(primary.toString(), false)
-                if(primary.toString() != fristClip){
+                if (primary.toString() != fristClip && !isAppClip) {
                     var element = JsonObject()
                     element.addProperty("content", clipBean.content)
                     element.addProperty("isWhetherToCollect", false)
@@ -91,8 +95,10 @@ class SuspensionWindowService : Service() {
                     SPUtils.getInstance().put(CLIP_TEXT, clipJson.toString())
                     data.add(clipBean)
                     fristClip = clipBean.content
+                    clipAdapter.notifyDataSetChanged()
+                    clipView.clip_list.scrollToPosition(data.size - 1)
                 }
-                clipAdapter.notifyDataSetChanged()
+                isAppClip = false
                 windowClick?.getDesrc(primary.toString())
             }
         }
@@ -121,7 +127,7 @@ class SuspensionWindowService : Service() {
     }
 
     /**
-     * 创建初始的闪贴popwin
+     * 创建初始的闪贴window
      */
     private fun createClipWindowView() {
         isClipManager = false
@@ -135,7 +141,7 @@ class SuspensionWindowService : Service() {
         windowManagerLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         windowManagerLayoutParams.format = PixelFormat.RGBA_8888
         windowManagerLayoutParams.y = 0
-        windowManagerLayoutParams.width = ConvertUtils.dp2px(10f)
+        windowManagerLayoutParams.width = ConvertUtils.dp2px(15f)
         windowManagerLayoutParams.height = ConvertUtils.dp2px(150f)
         windowManagerLayoutParams.windowAnimations = android.R.style.Animation_Translucent
         windowContentView = LayoutInflater.from(applicationContext).inflate(R.layout.layout_window, null)
@@ -146,6 +152,9 @@ class SuspensionWindowService : Service() {
         touchManager.addView(windowContentView, windowManagerLayoutParams)
     }
 
+    /**
+     * 创建侧边栏滑动后的window
+     */
     fun createClipManagerView() {
         isClipManager = true
         clipView = LayoutInflater.from(applicationContext).inflate(R.layout.layout_clip_list, null)
@@ -156,7 +165,7 @@ class SuspensionWindowService : Service() {
         } else {
             clipWindowManagerLayoutParams.type = WindowManager.LayoutParams.TYPE_TOAST
         }
-        clipWindowManagerLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_BLUR_BEHIND or WindowManager.LayoutParams.FLAG_FULLSCREEN
+        clipWindowManagerLayoutParams.flags = WindowManager.LayoutParams.FLAG_BLUR_BEHIND or WindowManager.LayoutParams.FLAG_FULLSCREEN
         clipWindowManagerLayoutParams.format = PixelFormat.RGBA_8888
         clipWindowManagerLayoutParams.y = 0
         clipWindowManagerLayoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -167,6 +176,35 @@ class SuspensionWindowService : Service() {
         clipView.clip_setting.setOnClickListener {
             removeUpdateView()
             createClipWindowView()
+            windowClick!!.startSettingActivity()
+        }
+        clipView.clip_list.scrollToPosition(data.size - 1)
+        clipAdapter.setOnItemChildClickListener { adapter, view, position ->
+            when (view.id) {
+                R.id.item_layout -> {
+                    removeUpdateView()
+                    createClipWindowView()
+                }
+                R.id.clip_content -> {
+                    isAppClip = true
+                    var clipData = ClipData.newPlainText("", data[position].content)
+                    clipManager.primaryClip = clipData
+                }
+            }
+
+        }
+        clipView.setOnClickListener {
+            removeUpdateView()
+            createClipWindowView()
+        }
+        clipView.setOnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                removeUpdateView()
+                createClipWindowView()
+                true
+            } else {
+                false
+            }
         }
         clipView.clip_list.adapter = clipAdapter
         clipView.clip_cleanAll.setOnClickListener { }
@@ -182,9 +220,11 @@ class SuspensionWindowService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return windowBinder
     }
-    fun getIsClipManager() :Boolean{
+
+    fun getIsClipManager(): Boolean {
         return isClipManager
     }
+
     override fun onDestroy() {
         isClipManager = false
         removeWindowView()
@@ -210,4 +250,5 @@ class SuspensionWindowService : Service() {
             createClipManagerView()
         }
     }
+
 }

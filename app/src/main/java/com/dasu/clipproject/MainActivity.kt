@@ -5,15 +5,18 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.SPUtils
 import com.blankj.utilcode.util.ToastUtils
+import com.dasu.clipproject.activity.SettingActivity
 import com.dasu.clipproject.common.Constans.IS_WINDOW
 import com.dasu.clipproject.listener.IWindowOnClickListener
 import com.dasu.clipproject.service.SuspensionWindowService
@@ -102,6 +105,11 @@ class MainActivity : AppCompatActivity() {
                 windowService = service
                 LogUtils.e("WindowToast", windowService)
                 windowService!!.getService.setWindowOnClickListener(object : IWindowOnClickListener {
+                    override fun startSettingActivity() {
+                        var intent = Intent(this@MainActivity,SettingActivity::class.java)
+                        startActivity(intent)
+                    }
+
                     override fun openClipWindow() {
                         windowService!!.updateClipWindowView()
                     }

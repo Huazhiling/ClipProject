@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">闪贴</string>
+    <string name="app_setting">设置</string>
 </resources>

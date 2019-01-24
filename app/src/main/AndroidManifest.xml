@@ -24,8 +24,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.ClipboardRecordActivity"
-            android:screenOrientation="portrait" />
+            android:name=".activity.SettingActivity"
+            android:launchMode="singleInstance" />
 
         <service
             android:name=".service.SuspensionWindowService"
