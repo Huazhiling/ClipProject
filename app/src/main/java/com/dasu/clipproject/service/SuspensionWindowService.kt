@@ -6,38 +6,33 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
 import android.view.*
 import com.blankj.utilcode.util.SPUtils
 import com.dasu.clipproject.R
 import com.dasu.clipproject.adapter.ClipAdapter
 import com.dasu.clipproject.bean.ClipBean
-import com.dasu.clipproject.common.Constans.CLIP_TEXT
 import com.dasu.clipproject.common.Constans.IS_WINDOW
 import com.dasu.clipproject.listener.IClipManagerListener
 import com.dasu.clipproject.listener.IWindowHelperListener
 import com.dasu.clipproject.listener.IWindowOnClickListener
 import com.dasu.clipproject.utils.ClipHelper
-import com.dasu.clipproject.view.WindowHelper
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
+import com.dasu.clipproject.utils.WindowHelper
 import kotlinx.android.synthetic.main.layout_clip_list.view.*
 
 class SuspensionWindowService : Service() {
-    private lateinit var clipView: View
     private var windowBinder = WindowBinder()
-    private lateinit var windowContentView: View
     private lateinit var clipAdapter: ClipAdapter
+    private lateinit var clipSearchAdapter: ClipAdapter
     private lateinit var touchManager: WindowManager
     private lateinit var clipManager: ClipboardManager
     private var windowClick: IWindowOnClickListener? = null
     private var data = ArrayList<ClipBean.ClipItemData>()
+    private var searchData = ArrayList<ClipBean.ClipItemData>()
     private lateinit var windowHelper: WindowHelper
     private lateinit var clipHelper: ClipHelper
     private var isClipManager = false
-    private var previousClip = ""
-    private var isAppClip = false
     override fun onCreate() {
         super.onCreate()
         createOnWindowManager()
@@ -49,6 +44,7 @@ class SuspensionWindowService : Service() {
      */
     private fun createClipListener() {
         clipAdapter = ClipAdapter(R.layout.item_clip_layout, data)
+        clipSearchAdapter = ClipAdapter(R.layout.item_clip_layout, searchData)
         clipManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipHelper = ClipHelper.init(
                 object : IClipManagerListener {
@@ -71,6 +67,12 @@ class SuspensionWindowService : Service() {
         touchManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowHelper = WindowHelper.init(touchManager, applicationContext)
         windowHelper.setWindowHelper(object : IWindowHelperListener {
+            override fun clearAllItem() {
+                data.clear()
+                clipAdapter.notifyDataSetChanged()
+                windowHelper.showDialog("剪贴板清除成功")
+            }
+
             override fun setAdapter(fullScreenView: View) {
                 clipAdapter.setOnItemChildClickListener { adapter, view, position ->
                     when (view.id) {
@@ -82,6 +84,7 @@ class SuspensionWindowService : Service() {
                             clipHelper.setIsAppClip(true)
                             var clipData = ClipData.newPlainText("", data[position].content)
                             clipManager.primaryClip = clipData
+                            windowHelper.showDialog("文本已复制到剪贴板")
                         }
                     }
 
@@ -100,7 +103,13 @@ class SuspensionWindowService : Service() {
                     }
                 }
                 fullScreenView.clip_list.adapter = clipAdapter
-                fullScreenView.clip_cleanAll.setOnClickListener { }
+                fullScreenView.clip_cleanAll.setOnClickListener {
+                    if (data.size > 0) {
+                        windowHelper.createClearAllView()
+                    } else {
+                        windowHelper.showDialog("当前没有记录")
+                    }
+                }
                 fullScreenView.clip_search.setOnClickListener { }
                 fullScreenView.clip_collection.setOnClickListener { }
             }

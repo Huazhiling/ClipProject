@@ -7,5 +7,5 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="trasation_gray">#55333333</color>
-    <color name="dialog_gray">#99333333</color>
+    <color name="dialog_gray">#99000000</color>
 </resources>
