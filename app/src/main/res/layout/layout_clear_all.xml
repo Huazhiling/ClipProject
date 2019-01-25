@@ -68,7 +68,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:padding="10dp"
-            android:text="取消"
+            android:text="确定"
             android:textSize="15sp" />
     </LinearLayout>
 </LinearLayout>

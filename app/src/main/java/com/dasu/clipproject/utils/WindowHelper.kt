@@ -139,13 +139,14 @@ object WindowHelper {
             windowHelper!!.setAdapter(fullScreenView)
             windowViewMap[SCREEN_VIEW] = fullScreenView
         }
+        fullScreenView.search.visibility = View.GONE
+        fullScreenView.not_search.visibility = View.VISIBLE
         windowManager.addView(fullScreenView, clipWindowManagerLayoutParams)
     }
 
     fun showDialog(msg: String) {
         if (windowViewMap[TOAST_VIEW] == null) {
             toastView = LayoutInflater.from(applicationContext).inflate(R.layout.layout_toast, null)
-            toastView.dialog_content.text = msg
             toastLayoutParams = WindowManager.LayoutParams()
             toastLayoutParams.gravity = Gravity.CENTER
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -160,6 +161,7 @@ object WindowHelper {
             toastLayoutParams.windowAnimations = android.R.style.Animation_Toast
             windowViewMap[TOAST_VIEW] = toastView
         }
+        toastView.dialog_content.text = msg
         windowManager.addView(toastView, toastLayoutParams)
         Handler().postDelayed({
             removeToastView()

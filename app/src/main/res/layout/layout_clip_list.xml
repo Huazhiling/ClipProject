@@ -96,6 +96,7 @@
                 android:padding="10dp"
                 android:textSize="13sp" />
 
+
             <ImageView
                 android:id="@+id/edit_clear"
                 android:layout_width="36dp"
