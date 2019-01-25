@@ -6,9 +6,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
 import android.view.*
+import android.view.animation.AnimationUtils
+import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.SPUtils
 import com.dasu.clipproject.R
 import com.dasu.clipproject.adapter.ClipAdapter
@@ -19,6 +20,7 @@ import com.dasu.clipproject.listener.IWindowHelperListener
 import com.dasu.clipproject.listener.IWindowOnClickListener
 import com.dasu.clipproject.utils.ClipHelper
 import com.dasu.clipproject.utils.WindowHelper
+import com.dasu.clipproject.utils.WindowHelper.showDialog
 import kotlinx.android.synthetic.main.layout_clip_list.view.*
 
 class SuspensionWindowService : Service() {
@@ -78,7 +80,7 @@ class SuspensionWindowService : Service() {
                     when (view.id) {
                         R.id.item_layout -> {
                             windowHelper.removeUpdateView()
-                            windowHelper.createSideWindowManager()
+                            createClipSideWindowView()
                         }
                         R.id.clip_content -> {
                             clipHelper.setIsAppClip(true)
@@ -90,18 +92,19 @@ class SuspensionWindowService : Service() {
 
                 }
                 fullScreenView.setOnClickListener {
-                    WindowHelper.removeUpdateView()
-                    createClipWindowView()
+                    windowHelper.removeUpdateView()
+                    createClipSideWindowView()
                 }
                 fullScreenView.setOnKeyListener { v, keyCode, event ->
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        WindowHelper.removeUpdateView()
-                        createClipWindowView()
+                        windowHelper.removeUpdateView()
+                        createClipSideWindowView()
                         true
                     } else {
                         false
                     }
                 }
+
                 fullScreenView.clip_list.adapter = clipAdapter
                 fullScreenView.clip_cleanAll.setOnClickListener {
                     if (data.size > 0) {
@@ -110,8 +113,6 @@ class SuspensionWindowService : Service() {
                         windowHelper.showDialog("当前没有记录")
                     }
                 }
-                fullScreenView.clip_search.setOnClickListener { }
-                fullScreenView.clip_collection.setOnClickListener { }
             }
 
             override fun startSettingActivity() {
@@ -122,13 +123,13 @@ class SuspensionWindowService : Service() {
                 view.clip_list.scrollToPosition(data.size - 1)
             }
         })
-        createClipWindowView()
+        createClipSideWindowView()
     }
 
     /**
      * 创建初始的闪贴window
      */
-    private fun createClipWindowView() {
+    private fun createClipSideWindowView() {
         isClipManager = false
         windowHelper.createSideWindowManager()
     }
@@ -162,7 +163,7 @@ class SuspensionWindowService : Service() {
 
         fun updateClipWindowView() {
             windowHelper.removeUpdateView()
-            createClipWindowView()
+            createClipSideWindowView()
         }
 
         fun updateClipManagerView() {

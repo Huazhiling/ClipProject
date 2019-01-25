@@ -1,11 +1,13 @@
 package com.dasu.clipproject.utils
 
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
 import android.view.*
+import android.view.animation.AnimationUtils
 import com.blankj.utilcode.util.ConvertUtils
 import com.blankj.utilcode.util.SPUtils
 import com.dasu.clipproject.R
@@ -88,7 +90,7 @@ object WindowHelper {
             } else {
                 clipWindowManagerLayoutParams.type = WindowManager.LayoutParams.TYPE_TOAST
             }
-            clipWindowManagerLayoutParams.flags = WindowManager.LayoutParams.FLAG_BLUR_BEHIND or WindowManager.LayoutParams.FLAG_FULLSCREEN
+            clipWindowManagerLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_BLUR_BEHIND or WindowManager.LayoutParams.FLAG_FULLSCREEN
             clipWindowManagerLayoutParams.format = PixelFormat.RGBA_8888
             clipWindowManagerLayoutParams.y = 0
             clipWindowManagerLayoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -109,7 +111,30 @@ object WindowHelper {
                 removeUpdateView()
                 createSideWindowManager()
             }
+            fullScreenView.clip_search.setOnClickListener {
+//                var searchLayout = fullScreenView.search
+//                var notSearchLayout = fullScreenView.not_search
+//                var showAnimation = AnimationUtils.loadAnimation(applicationContext, R.anim.search_show_animation)
+//                var hideAnimation = AnimationUtils.loadAnimation(applicationContext, R.anim.search_hide_animation)
+//                searchLayout.startAnimation(showAnimation)
+//                notSearchLayout.startAnimation(hideAnimation)
+                fullScreenView.search.visibility = View.VISIBLE
+                fullScreenView.not_search.visibility = View.GONE
+            }
+            fullScreenView.edit_clear.setOnClickListener {
+//                var searchLayout = fullScreenView.search
+//                var notSearchLayout = fullScreenView.not_search
+//                var showAnimation = AnimationUtils.loadAnimation(applicationContext, R.anim.search_show_animation)
+//                var hideAnimation = AnimationUtils.loadAnimation(applicationContext, R.anim.search_hide_animation)
+//                searchLayout.startAnimation(showAnimation)
+//                notSearchLayout.startAnimation(hideAnimation)
+                fullScreenView.search.visibility = View.GONE
+                fullScreenView.not_search.visibility = View.VISIBLE
+            }
+            fullScreenView.clip_collection.setOnClickListener {
 
+            }
+//
             windowHelper!!.scrollToPosition(fullScreenView)
             windowHelper!!.setAdapter(fullScreenView)
             windowViewMap[SCREEN_VIEW] = fullScreenView
