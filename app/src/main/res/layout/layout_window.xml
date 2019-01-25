@@ -3,5 +3,5 @@
     android:id="@+id/window_layout"
     android:layout_width="20dp"
     android:layout_height="150dp"
-    android:background="@color/trasition_gray">
+    android:background="@color/trasation_gray">
 </View>

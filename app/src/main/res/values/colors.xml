@@ -6,5 +6,6 @@
     <color name="ripple_color">#8BAE5A</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="trasition_gray">#55333333</color>
+    <color name="trasation_gray">#55333333</color>
+    <color name="dialog_gray">#99333333</color>
 </resources>
